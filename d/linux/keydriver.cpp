@@ -79,6 +79,7 @@ static bool is_keyboard_device(int fd)
   case BUS_USB:
   case BUS_I8042:
   case BUS_ADB:
+  case BUS_BLUETOOTH: // 2018/04/25 oonishi
     break;					// ok
   default:
     return false;			// unmatch bus type
@@ -88,7 +89,8 @@ static bool is_keyboard_device(int fd)
   if (ioctl(fd, EVIOCGBIT(0, sizeof(evtype_bitmask)), evtype_bitmask) > 0)
   {
     // EV_SYN, EV_KEY, EV_REP ならおｋ
-    if (test_bit(EV_SYN, evtype_bitmask) && test_bit(EV_KEY, evtype_bitmask) && test_bit(EV_REP, evtype_bitmask))
+    //if (test_bit(EV_SYN, evtype_bitmask) && test_bit(EV_KEY, evtype_bitmask) && test_bit(EV_REP, evtype_bitmask))
+    if (!test_bit(EV_REL, evtype_bitmask) && test_bit(EV_SYN, evtype_bitmask) && test_bit(EV_KEY, evtype_bitmask) && test_bit(EV_REP, evtype_bitmask))
     {				
       return true;
     }
@@ -224,20 +226,20 @@ static int create_uinput_keyboard()
   ret = ioctl(g_uinput_fd, UI_SET_EVBIT, EV_KEY);
   if(ioctl(g_uinput_fd, UI_SET_EVBIT, EV_SYN) == -1)fprintf(stderr, "%d:ioctl\n", __LINE__);
   ioctl(g_uinput_fd, UI_SET_EVBIT, EV_REP);
-  ioctl(g_uinput_fd, UI_SET_EVBIT, EV_REL);
+  //ioctl(g_uinput_fd, UI_SET_EVBIT, EV_REL);
   ioctl(g_uinput_fd, UI_SET_RELBIT, REL_X);
   ioctl(g_uinput_fd, UI_SET_RELBIT, REL_Y);
   for (i=0; i < KEY_MAX; i++) {
     ioctl(g_uinput_fd, UI_SET_KEYBIT, i);
   }
-  ioctl(g_uinput_fd, UI_SET_KEYBIT, BTN_MOUSE);
+  //ioctl(g_uinput_fd, UI_SET_KEYBIT, BTN_MOUSE);
   //	ioctl(g_uinput_fd, UI_SET_KEYBIT, BTN_TOUCH);
-  ioctl(g_uinput_fd, UI_SET_KEYBIT, BTN_MOUSE);
-  ioctl(g_uinput_fd, UI_SET_KEYBIT, BTN_LEFT);
-  ioctl(g_uinput_fd, UI_SET_KEYBIT, BTN_MIDDLE);
-  ioctl(g_uinput_fd, UI_SET_KEYBIT, BTN_RIGHT);
-  ioctl(g_uinput_fd, UI_SET_KEYBIT, BTN_FORWARD);
-  ioctl(g_uinput_fd, UI_SET_KEYBIT, BTN_BACK);
+  //ioctl(g_uinput_fd, UI_SET_KEYBIT, BTN_MOUSE);
+  //ioctl(g_uinput_fd, UI_SET_KEYBIT, BTN_LEFT);
+  //ioctl(g_uinput_fd, UI_SET_KEYBIT, BTN_MIDDLE);
+  //ioctl(g_uinput_fd, UI_SET_KEYBIT, BTN_RIGHT);
+  //ioctl(g_uinput_fd, UI_SET_KEYBIT, BTN_FORWARD);
+  //ioctl(g_uinput_fd, UI_SET_KEYBIT, BTN_BACK);
 	
   write(g_uinput_fd, &uinp, sizeof(uinp));
 
@@ -528,7 +530,7 @@ bool receive_keyboard_event(struct input_event* event)
       {
         // データが書き込まれたデバイスから読み込む
         if (read(event_fd, &revent, sizeof(revent)) < (int)sizeof(revent))
-        {          
+        {
           // キーボードが外された時に、ENODEVのエラーになる
           if (errno == ENODEV)
           {
