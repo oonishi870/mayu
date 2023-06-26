@@ -31,6 +31,7 @@ static int g_uinput_fd = -1;
 #define EVDEV_MINORS	32
 static int g_envdev_key_fds[EVDEV_MINORS];
 static int g_envdev_key_fds_count = 0;
+static int g_envdev_has_error = 0;
 
 static bool g_grab_onoff = false;
 
@@ -79,6 +80,7 @@ static bool is_keyboard_device(int fd)
   case BUS_USB:
   case BUS_I8042:
   case BUS_ADB:
+  case BUS_BLUETOOTH:
     break;					// ok
   default:
     return false;			// unmatch bus type
@@ -154,6 +156,31 @@ static int open_keyboard()
     }
   }
   return g_envdev_key_fds_count;
+}
+
+
+static int count_keyboard()
+{
+  int i, fd;
+  int count = 0;
+  for (i = 0;i < EVDEV_MINORS; i++)
+  {
+    fd = open_event_device(i);
+    if (fd != -1)
+    {
+      if (is_keyboard_device(fd))
+      {
+        count ++;
+      }
+      close(fd);
+    }
+  }
+  return count;
+}
+
+int has_changed_keyboard_count(){
+  int ret = count_keyboard();
+  return ret != g_envdev_key_fds_count;
 }
 
 static void close_keyboard()
@@ -385,6 +412,8 @@ static void close_keyboard_and_uinput()
 // 失敗したならエラーコード、成功なら0を返す
 static int open_keyboard_and_uinput()
 {
+  g_envdev_key_fds_count = 0;
+  g_uinput_fd = -1;
   int ret = open_keyboard(); // オープンに成功したデバイスの個数が返る
   if (ret <= 0)
   {
@@ -445,6 +474,9 @@ static int restart_keyboard()
 {
   bool grabed = g_grab_onoff;
   close_keyboard_and_uinput();
+  if(g_envdev_has_error){
+    return -1;
+  }
   int ret = open_keyboard_and_uinput();
   if (ret == 0)
   {
@@ -544,7 +576,7 @@ bool receive_keyboard_event(struct input_event* event)
               // キーボードデバイスを開き直す
               restart_keyboard();
               // 最初から
-              if (g_envdev_key_fds_count <= 0 && g_uinput_fd <= 0)
+              if (g_envdev_has_error || g_envdev_key_fds_count <= 0 && g_uinput_fd <= 0)
               {
                 return false;
               }
@@ -588,14 +620,17 @@ bool receive_keyboard_event(struct input_event* event)
 void keyboard_grab_onoff(bool onoff)
 {
   int i;
-	
+  g_envdev_has_error = 0;
   if (g_envdev_key_fds_count <= 0 && g_uinput_fd <= 0)
     return;
 	
   for (i = 0; i < g_envdev_key_fds_count; i++)
   {
-    if (ioctl(g_envdev_key_fds[i], EVIOCGRAB, (int)onoff) == -1)	//grab開始
+    if (ioctl(g_envdev_key_fds[i], EVIOCGRAB, (int)onoff) == -1){	//grab開始
       fprintf(stderr, "error: EVIOCGRAB ioctl failed\n");
+      g_envdev_has_error = 1;
+      continue;
+    }
   }
   g_grab_onoff = onoff;
 }

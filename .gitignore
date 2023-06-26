@@ -1,0 +1,13 @@
+*.o
+*~
+.deps/
+.mayu
+Makefile
+autom4te.cache/
+config.h
+config.log
+config.status
+d/darwin/.deps/
+d/darwin/Makefile
+mayu
+stamp-h1

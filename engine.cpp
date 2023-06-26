@@ -2,6 +2,8 @@
 // engine.cpp
 
 
+#include <thread>
+
 #include "misc.h"
 #include "wintypes.h"
 
@@ -27,6 +29,8 @@
 #include <fcntl.h>
 #endif
 
+
+extern int has_changed_keyboard_count();
 
 #if defined(WIN32)
 // check focus window
@@ -1213,6 +1217,17 @@ void Engine::close()
 }
 
 
+
+void ThreadFunc() {
+  sleep(5);
+  while(1){
+    if(has_changed_keyboard_count()){
+      exit(-1);
+    }
+    sleep(3);
+  }
+}
+    
 // start keyboard handler thread
 void Engine::start()
 {
@@ -1231,7 +1246,9 @@ void Engine::start()
   CHECK( WAIT_OBJECT_0 ==, WaitForSingleObject(m_threadEvent, INFINITE) );
 #elif defined(__linux__)
   keyboard_grab_onoff(true);
+  std::thread th1(ThreadFunc);
   keyboardHandler();
+  th1.join();
   keyboard_grab_onoff(false);
 #  elif defined(__APPLE__)
   int result = ioctl(m_device, CTL_CODE_GRAB_ON);
