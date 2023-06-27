@@ -178,9 +178,12 @@ static int count_keyboard()
   return count;
 }
 
+static int s_prev_count=-1;
 int has_changed_keyboard_count(){
   int ret = count_keyboard();
-  return ret != g_envdev_key_fds_count;
+  int prev_count = s_prev_count;
+  s_prev_count = ret;
+  return (prev_count != -1) && ret != prev_count;
 }
 
 static void close_keyboard()
