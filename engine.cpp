@@ -1219,12 +1219,11 @@ void Engine::close()
 
 
 void ThreadFunc() {
-  sleep(5);
   while(1){
     if(has_changed_keyboard_count()){
       exit(-1);
     }
-    sleep(3);
+    sleep(1);
   }
 }
     
