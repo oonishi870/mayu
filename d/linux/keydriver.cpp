@@ -144,6 +144,7 @@ static int open_keyboard()
     {
       if (is_keyboard_device(fd))
       {
+        fprintf(stderr, "keydriver.cpp:147\n");
         g_envdev_key_fds[g_envdev_key_fds_count++] = fd;
         add_fd_to_epoll(fd);
       }
