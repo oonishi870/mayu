@@ -499,13 +499,14 @@ bool receive_keyboard_event(struct input_event* event)
 
   if (g_envdev_key_fds_count <= 0 && g_uinput_fd <= 0)
     return false;
-	
+  fprintf(stderr, "keydriver.cpp:502\n");
   while (!loop_stop)
   {
     int num_of_events = epoll_wait(g_epoll_fd, epoll_e, EVDEV_MINORS + 1, -1);
 
     for (int i = 0; i < num_of_events; i++)
     {
+      fprintf(stderr, "keydriver.cpp:509\n");
       int event_fd = epoll_e[i].data.fd;
       // udevをチェック
       if (event_fd == g_udev_fd)
@@ -530,6 +531,7 @@ bool receive_keyboard_event(struct input_event* event)
         // データが書き込まれたデバイスから読み込む
         if (read(event_fd, &revent, sizeof(revent)) < (int)sizeof(revent))
         {          
+          fprintf(stderr, "keydriver.cpp:533\n");
           // キーボードが外された時に、ENODEVのエラーになる
           if (errno == ENODEV)
           {
@@ -565,15 +567,18 @@ bool receive_keyboard_event(struct input_event* event)
         // キーボードイベントならhandlerへ通知
         if (revent.type == EV_KEY)
         {
+          fprintf(stderr, "keydriver.cpp:570\n");
           loop_stop = true;
           *event = revent;
           break;
         }
         else if (revent.type == EV_SYN)	// 無視
         {
+          fprintf(stderr, "keydriver.cpp:576\n");
         }
         else if (revent.type == EV_MSC)	// 無視
         {
+          fprintf(stderr, "keydriver.cpp:582\n");
         }
         else
         {
