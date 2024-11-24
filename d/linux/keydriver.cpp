@@ -474,6 +474,7 @@ int send_input_event(int type, int code, int value)
   event.value = value;
 	
   result = write(g_uinput_fd, &event, sizeof(event));
+  fprintf(stderr, "keydriver.cpp:477 result=%d\n", result);
   return (result < 0 ? errno :
           (result < (int)sizeof(event) ? -1 : 0));
 }
