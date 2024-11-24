@@ -514,8 +514,10 @@ bool receive_keyboard_event(struct input_event* event)
         int vid = 0, pid = 0;
         if (get_udev_usb_vid_pid(g_udev_mon, vid, pid) > 0)
         {
+          fprintf(stderr, "keydriver.cpp:517\n");
           if (is_divice_keyboard_with_vid_pid(g_usb_context, vid, pid))
           {
+            fprintf(stderr, "keydriver.cpp:519\n");
             // キーボードデバイスを開き直す
             restart_keyboard();
             // 最初から
@@ -528,6 +530,7 @@ bool receive_keyboard_event(struct input_event* event)
       }
       else
       {
+        fprintf(stderr, "keydriver.cpp:531\n");
         // データが書き込まれたデバイスから読み込む
         if (read(event_fd, &revent, sizeof(revent)) < (int)sizeof(revent))
         {          
@@ -563,6 +566,7 @@ bool receive_keyboard_event(struct input_event* event)
 
         // 読み込み成功
         try_to_repair = false;
+        fprintf(stderr, "keydriver.cpp:566\n");
 
         // キーボードイベントならhandlerへ通知
         if (revent.type == EV_KEY)
