@@ -462,10 +462,12 @@ int send_input_event(int type, int code, int value)
 {
   int result;
   input_event event = {{0}};
+  fprintf(stderr, "keydriver.cpp:465 value=%d\n", value);
 
   if (g_envdev_key_fds_count <= 0 && g_uinput_fd <= 0)
     return -1;
 	
+  fprintf(stderr, "keydriver.cpp:470 value=%d\n", value);
   gettimeofday(&event.time, NULL);
   event.type = type;
   event.code = code;
@@ -478,7 +480,7 @@ int send_input_event(int type, int code, int value)
 
 bool send_keyboard_event(int code, KEY_EVENT_VAL value)
 {
-  fprintf(stderr, "keydriver.cpp:481\n");
+  fprintf(stderr, "keydriver.cpp:481 value=%d\n", value);
   if (g_envdev_key_fds_count <= 0 && g_uinput_fd <= 0)
     return false;
 	
