@@ -478,12 +478,15 @@ int send_input_event(int type, int code, int value)
 
 bool send_keyboard_event(int code, KEY_EVENT_VAL value)
 {
+  fprintf(stderr, "keydriver.cpp:481\n");
   if (g_envdev_key_fds_count <= 0 && g_uinput_fd <= 0)
     return false;
 	
+  fprintf(stderr, "keydriver.cpp:485\n");
   if (send_input_event(EV_KEY, code, value) < 0)
     return false;
 
+  fprintf(stderr, "keydriver.cpp:489\n");
   send_input_event(EV_SYN, SYN_REPORT, 0); // ƒGƒ‰[‚ª”­¶‚µ‚Ä‚à–³Ž‹
 	
   return true;
@@ -591,8 +594,11 @@ bool receive_keyboard_event(struct input_event* event)
           write(g_uinput_fd, &revent, sizeof(revent));
         }
       }
+      fprintf(stderr, "keydriver.cpp:594\n");
     }
+    fprintf(stderr, "keydriver.cpp:596\n");
   }	
+  fprintf(stderr, "keydriver.cpp:598\n");
   return true;
 }
 

@@ -345,7 +345,9 @@ void Engine::generateKeyEvent(Key *i_key, bool i_doPress, bool i_isByAssign)
       const ScanCode *sc = i_key->getScanCodes();
       for (size_t i = 0; i < i_key->getScanCodesSize(); ++ i)
       {
+        fprintf(stderr, "engine.cpp:348\n");
         send_keyboard_event(sc[i].m_scan, (i_doPress ? KEY_EVENT_PRESSE : KEY_EVENT_BREAK));
+        fprintf(stderr, "engine.cpp:350\n");
       }
       // #  elif defined(__APPLE__)
 #else
@@ -876,7 +878,9 @@ void Engine::keyboardHandler()
 #elif defined(_WIN95)
         DeviceIoControl(m_device, 2, &kid, sizeof(kid), NULL, 0, &len, NULL);
 #elif defined(__linux__)
+        fprintf(stderr, "engine.cpp:879\n");
         send_keyboard_event(ievent.code, static_cast<KEY_EVENT_VAL>(ievent.value));
+        fprintf(stderr, "engine.cpp:881\n");
 #  elif defined(__APPLE__)
         write(m_device, &kid, sizeof(kid));
 #else
@@ -898,7 +902,9 @@ void Engine::keyboardHandler()
 #elif defined(_WIN95)
       DeviceIoControl(m_device, 2, &kid, sizeof(kid), NULL, 0, &len, NULL);
 #elif defined(__linux__)
+      fprintf(stderr, "engine.cpp:903\n");
       send_keyboard_event(ievent.code, static_cast<KEY_EVENT_VAL>(ievent.value));
+      fprintf(stderr, "engine.cpp:905\n");
 #  elif defined(__APPLE__)
       write(m_device, &kid, sizeof(kid));
 #else
